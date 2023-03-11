@@ -250,11 +250,95 @@ vector<double> change(vector<vector<double>> arr, vector<double> a)
 };
 vector<double> yacob(vector<vector<double>> a, vector<double> b1,double e1)
 {
+    vector<vector<double>> arr = a;
+    vector<double> b = b1;
+    double e = e1;
+    vector<double> result=b1;
+    int n = arr.size();
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            
+            if (i != j)
+            {
+                arr[i][j] /= a[i][i] ;
+            }
+            else
+            {
+                arr[i][i] = b[i] / a[i][i];
+            }
+        }
+        //result[i] = arr[i][i];
+    }
     
+   
+    int iter = 0;
+    arr = check(arr); //printf("\n"); vivod(arr);
+    for (int i = 0; i < n; i++)
+    {
+        result[i] = arr[i][i];
+    }
+    //vivod(result);
+    //printf("\n");
+    while (norm(b,result,e)) 
+    {
+        b = result;
+        result = change(arr,result);
+        //vivod(result);
+        //printf("\n");
+        iter++;
+    }
+
+   // if (iter%2==1)
+    //{
+    //    result = b;
+    //}
+    printf("\n%d\n",iter);
+    vivod(result);
+    printf("\n");
+    vivod(nev(a, b1, result));
+    return result;
 }
 vector<double> zeyd(vector<vector<double>> a, vector<double> b1, double e1)
 {
-    
+    vector<vector<double>> arr = a;
+    vector<double> b = b1;
+    double e = e1;
+    vector<double> result;
+    int n = arr.size();
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+
+            if (i != j)
+            {
+                arr[i][j] /= a[i][i];
+            }
+            else
+            {
+                arr[i][i] = b[i] / a[i][i];
+            }
+        }
+        result.push_back(0);
+    }
+    //vivod(arr);
+    result[0] = a[0][0];
+
+    int iter = 0;
+    while (norm(result, b, e))
+    {
+        b = result;
+        result = change(arr,result);
+        iter++;
+    }
+    printf("%d\n",iter);
+
+
+
+    vivod(nev(a,b1,result));
+    return result;
 }
 
 
