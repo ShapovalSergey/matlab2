@@ -16,80 +16,54 @@ using namespace std;
 
 void vivod(vector<double> arr);
 void vivod(vector<vector<double>> arr);
-vector<vector<double>> check(vector<vector<double>> arr)
+void write_to_file(vector<vector<double>> a, vector<double> b, vector<double> answ, vector<double> nev)
+//Функция записи информации в файл
 {
-    vector<vector<double>> result=arr;
-    //vivod(arr);
-    double sum,sum1;
-    int n = arr.size();
-    for (int i = 0; i < n; i++)
+    FILE* p1; string str;
+    p1 = fopen("results.txt", "r");
+    if (p1 == NULL)
     {
-        sum = 0; sum1 = 0;
-        for (int j = 0; j < n; j++)
-        {
-            if (i!=j)
-            {
-            sum += fabs(arr[i][j]);
-            //sum1 += fabs(arr[j][i]);
-            }
-        }
-        if (sum>=1)
-        {
-            for (int j = 0; j < n; j++)
-            {
-                result[i][j] /= sum + 1;
-            }
-        }
+        p1 = fopen("results.txt", "w");
     }
-    return result;
-};
+    _fcloseall();
 
-vector<vector<double>> random_matrix(int n) 
-{
-    srand(time(NULL));
-    vector<vector<double>> result;
-    vector<double>h1;
-    for (int i = 0; i < n; i++)
+    ofstream out("results.txt", ios::app);
+
+    out << "Исходная матрица" << endl;
+
+    for (int i = 0; i < a[0].size(); i++)
     {
-        result.push_back(h1);
-        for (int j = 0; j < n; j++)
+        string str = "";
+        for (int j = 0; j < a[0].size(); j++)
         {
-            if (i==j)
-            {
-                result[i].push_back(rand()%n+n);
-            }
-            else
-            {
-                result[i].push_back(rand() % n+1);
-            }
+            str += to_string(a[i][j]); str += " ";
         }
+        out << str << endl;
     }
-    return result;
+    out << "Столбец свободных членов" << endl;
+    str = "";
+    for (int i = 0; i < a[0].size(); i++)
+    {
+        out << b[i] << endl;
+    }
+    out << str << endl;
+    out << "Решения системы" << endl;
+    str = "";
+    for (int i = 0; i < a[0].size(); i++)
+    {
+        str = "x"; str += to_string(i); str += " = ";
+        str += to_string(answ[i]); str += " ";
+        out << str << endl;
+    }
+    out << "Невязки системы" << endl;
+    str = "";
+    for (int i = 0; i < a[0].size(); i++)
+    {
+        str = "r"; str += to_string(i); str += " = ";
+        str += to_string(nev[i]); str += " ";
+        out << str << endl;
+    }
 }
-
-vector<double> random_stolb(vector<vector<double>> arr,int n)
-{
-    srand(time(NULL)); double sum;
-    vector<double> result,result1;
-    for (int i = 0; i < n; i++)
-    {
-        result1.push_back(rand() % n + 1);
-    }
-    for (int i = 0; i < n; i++)
-    {
-        sum = 0;
-        for (int j = 0; j < n; j++)
-        {
-            sum += arr[i][j] * result1[j];
-        }
-        result.push_back(sum);
-    }
-
-
-
-    return result;
-}
-
 vector<double> nev(vector<vector<double>> a, vector<double> b1, vector<double> reshenie)
 //Функция нахождения невязок
 {
@@ -109,13 +83,12 @@ vector<double> nev(vector<vector<double>> a, vector<double> b1, vector<double> r
     return result;
 }
 bool norm1(vector<vector<double>> a, vector<double> b1, vector<double> reshenie, double e)
+//Функция остановки, невязки должны быть меньше точности
 {
     bool result = false;
     vector<double> nev_vector=nev(a,b1,reshenie);
-    //vivod(nev_vector);
     for (int i = 0; i < a.size(); i++)
     {
-        printf("%.2f e=%.2f ", fabs(nev_vector[i]), e); vivod(reshenie); printf("\n");
         if (fabs(nev_vector[i])>e)
         {
             result = true;
@@ -124,11 +97,12 @@ bool norm1(vector<vector<double>> a, vector<double> b1, vector<double> reshenie,
     return result;
 }
 bool norm(vector<double> a, vector<double> b,double e)
+//Функция остановки, разница нового и старого решения меньше точности
 {
     bool result=false;
     for (int i = 0; i < a.size(); i++)
     {
-        printf("%.4f e=%.4f\n", fabs(a[i] - b[i]),e);
+        //printf("%.4f e=%.4f\n", fabs(a[i] - b[i]),e);
         if (fabs(a[i]-b[i])>e)
         {
             result = true;
@@ -136,12 +110,20 @@ bool norm(vector<double> a, vector<double> b,double e)
     }
     return result;
 }
-void vivod(vector<double> arr)
+void vivod(vector<double> arr, char c)
 //Функция вывода на экран одномерного вектора
 {
     for (int i = 0; i < arr.size(); i++)
     {
-        printf("%.4f ", arr[i]);
+        if (c=='b')
+        {
+            printf("\n%c%d=%.2f ", c, i + 1, arr[i]);
+        }
+        else
+        {
+            printf("\n%c%d=%.4f ", c, i + 1, arr[i]);
+        }
+        
     }
 }
 
@@ -228,6 +210,7 @@ char* read_from_file(int n)
     return result;
 }
 vector<double> change(vector<vector<double>> arr, vector<double> a)
+//Функция выполнения итерации для метода Якоби
 {
     vector<double> result=a;
     int n = a.size();
@@ -248,8 +231,37 @@ vector<double> change(vector<vector<double>> arr, vector<double> a)
     }
     return result;
 };
-vector<double> yacob(vector<vector<double>> a, vector<double> b1,double e1)
+
+vector<double> change1(vector<vector<double>> arr, vector<double> a)
+//Функция выполнения итерации для метода Зейделя
 {
+    vector<double> result=a;
+    int n = a.size();
+    for (int i = 0; i < n; i++)
+    {
+        result[i] = 0;
+        for (int j = 0; j < n; j++)
+        {
+            if (i == j)
+            {
+                result[i] += arr[i][i];
+            }
+            else
+            {
+                result[i] -= arr[i][j] * a[j];
+            }
+        }
+        a[i] = result[i];
+    }
+    return result;
+};
+vector<double> yacob(vector<vector<double>> a, vector<double> b1,double e1)
+//Функция, находящая решение по методу Якоби
+{
+    printf("Исходная матрица\n");
+    vivod(a);
+    printf("Столбец свободных членов");
+    vivod(b1,'b'); //printf("\n");
     vector<vector<double>> arr = a;
     vector<double> b = b1;
     double e = e1;
@@ -266,42 +278,37 @@ vector<double> yacob(vector<vector<double>> a, vector<double> b1,double e1)
             }
             else
             {
-                arr[i][i] = b[i] / a[i][i];
+                arr[i][i] = b1[i] / a[i][i];
             }
         }
-        //result[i] = arr[i][i];
     }
-    
-   
     int iter = 0;
-    arr = check(arr); //printf("\n"); vivod(arr);
+    //arr = check(arr); 
     for (int i = 0; i < n; i++)
     {
         result[i] = arr[i][i];
     }
-    //vivod(result);
-    //printf("\n");
-    while (norm(b,result,e)) 
+    while (norm(result,b,e)) 
     {
         b = result;
         result = change(arr,result);
-        //vivod(result);
-        //printf("\n");
         iter++;
     }
-
-   // if (iter%2==1)
-    //{
-    //    result = b;
-    //}
-    printf("\n%d\n",iter);
-    vivod(result);
-    printf("\n");
-    vivod(nev(a, b1, result));
+    printf("\nКоличество итераций = %d\nРешение",iter);
+    vivod(result,'x');
+    printf("\nНевязки");
+    vivod(nev(a, b1, result),'r');
+    printf("\nЗаданная точность = %.4f", e);
+    write_to_file(a,b1,result, nev(a, b1, result));
     return result;
 }
 vector<double> zeyd(vector<vector<double>> a, vector<double> b1, double e1)
+//Функция, находящая решение по методу Зейделя
 {
+    printf("Исходная матрица\n");
+    vivod(a);
+    printf("Столбец свободных членов");
+    vivod(b1, 'b');
     vector<vector<double>> arr = a;
     vector<double> b = b1;
     double e = e1;
@@ -323,26 +330,23 @@ vector<double> zeyd(vector<vector<double>> a, vector<double> b1, double e1)
         }
         result.push_back(0);
     }
-    //vivod(arr);
-    result[0] = a[0][0];
-
+    result[0] = arr[0][0];
     int iter = 0;
-    while (norm(result, b, e))
+    while (norm1(a,b1,result,e))
     {
-        b = result;
-        result = change(arr,result);
+        result = change1(arr,result);
         iter++;
     }
-    printf("%d\n",iter);
-
-
-
-    vivod(nev(a,b1,result));
+    printf("\nКоличество итераций = %d\nРешение", iter);
+    vivod(result,'x');
+    printf("\nНевязки");
+    vivod(nev(a, b1, result),'r');
+    printf("\nЗаданная точность = %.4f",e);
+    write_to_file(a, b1, result, nev(a, b1, result));
     return result;
 }
 
-
-void func(int q) 
+void func(int q,bool metod) 
 {
     char str[100];
     strcpy(str, read_from_file(q));
@@ -351,11 +355,31 @@ void func(int q)
     vector<double> b1 = get_stolb(str);
     vector<vector<double>> arr = a;
     vector<double> b = b1;
-    int n = arr.size();
-    yacob(arr,b,e);
+    //int n = arr.size();
+    if (metod==true)
+    {
+        yacob(arr, b, e);
+    }
+    else
+    {
+        zeyd(arr,b,e);
+    }
 }
 
-
+void choose(int q) 
+{
+    int r;
+    printf("Выберите метод\n1)Метод Якоби\n2)Метод Зейделя\n");
+    scanf("%d",&r);
+    if (r==1)
+    {
+        func(q,true);
+    }
+    else
+    {
+         func(q,false);
+    }
+}
 
 int main()
 {
@@ -368,30 +392,25 @@ int main()
         scanf("%d", &type);
         if (type == 1)
         {
-            func(0);
+            choose(0);
         }
         else if (type == 2)
         {
-          
-            vector<vector<double>> a=random_matrix(10);
-            vector<double> b1 = random_stolb(a,10);
-            //yacob(a, b1, 0.00000000001);
-            vivod(nev(a,b1, yacob(a, b1, 0.0001)));
-            //  func(1);
+            choose(1);
         }
         else if (type == 3)
         {
-            func(1);
+            choose(2);
         }
         else if (type == 4)
         {
-            func(3);
+            choose(3);
         }
         else if (type == 5)
         {
-            func(2);
+            choose(4);
         }
-        printf("Вы хотите продолжить? (1 - да, 0 - нет)\n");
+        printf("\nВы хотите продолжить? (1 - да, 0 - нет)\n");
         scanf("%d", &mode);
     }
 }
